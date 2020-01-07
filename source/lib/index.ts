@@ -13,8 +13,6 @@ import { getMongoConnectionFromOptions } from './utils/connection';
 import { Database } from './utils/database';
 
 export async function mongoExport(options?: Options): Promise<ExportResult> {
-    // Check that mongoexport is installed
-    checkMongoexportInstalled();
     // Get purged options
     options = mergeOptions(options);
     // Instantiate logger util

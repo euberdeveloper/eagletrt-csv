@@ -38,157 +38,41 @@ export default function () {
 
             await mongoExport(options);
             const result = getResult(EXPORTED_PATH);
+            fs.writeFileSync(path.join(EXPECTED_PATH, 'first.js'), 'module.exports = `' + result + '`;')
             const expected = getExpected('first');
             expect(result).to.equal(expected);
 
         });
 
-        it(`Should export the animals database`, async function () {
+        it(`Should export databases vadena_2511_round_1 and vadena_2511_round_2`, async function () {
 
             const options: Options = {
-                databases: ['animals'],
+                databases: ['vadena_2511_round_1', 'vadena_2511_round_1'],
                 outDir: EXPORTED_PATH,
                 silent: true
             };
 
             await mongoExport(options);
             const result = getResult(EXPORTED_PATH);
+            fs.writeFileSync(path.join(EXPECTED_PATH, 'second.js'), 'module.exports = `' + result + '`;')
             const expected = getExpected('second');
             expect(result).to.equal(expected);
 
         });
 
-        it(`Should export the DB database`, async function () {
+        it(`Should export databases containing "log"`, async function () {
 
             const options: Options = {
-                databases: 'DB',
+                databases: /log/,
                 outDir: EXPORTED_PATH,
                 silent: true
             };
 
             await mongoExport(options);
             const result = getResult(EXPORTED_PATH);
+            fs.writeFileSync(path.join(EXPECTED_PATH, 'third.js'), 'module.exports = `' + result + '`;')
             const expected = getExpected('third');
             expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export databases beginning with underscore`, async function () {
-
-            const options: Options = {
-                databases: /^_/,
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = getResult(EXPORTED_PATH);
-            const expected = getExpected('fourth');
-            expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export databases beginning with underscore and DB`, async function () {
-
-            const options: Options = {
-                databases: [/^_/, 'DB'],
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = getResult(EXPORTED_PATH);
-            const expected = getExpected('fifth');
-            expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export databases 12345 and _12345`, async function () {
-
-            const options: Options = {
-                databases: ['12345', '_12345'],
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = getResult(EXPORTED_PATH);
-            const expected = getExpected('sixth');
-            expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export databases whose char-code sum is 821 and DB`, async function () {
-
-            const options: Options = {
-                databases: ['DB', db => [...db].reduce((prev, curr) => prev + curr.charCodeAt(0), 0) === 821],
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = getResult(EXPORTED_PATH);
-            const expected = getExpected('seventh');
-            expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export databases _DATABASE and _db with the name of the last appended with '_special'`, async function () {
-
-            const options: Options = {
-                databases: [
-                    '_DATABASE',
-                    {
-                        databases: '_db',
-                        type: 'csv',
-                        fields: ['timestamp', 'cpuUsage', 'random'],
-                        filePath: (db, collection, type) => path.join(db, `${collection}_special.${type}`)
-                    }
-                ],
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = getResult(EXPORTED_PATH);
-            const expected = getExpected('eight');
-            expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export everything as flat but animals with directory`, async function () {
-
-            const options: Options = {
-                all: true,
-                databases: {
-                    databases: 'animals',
-                    filePath: (db, collection, type, outDir) => path.join(outDir, db, `${collection}.${type}`),
-                    absolutePath: true
-                },
-                outType: 'flat',
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = getResult(EXPORTED_PATH);
-            const expected = getExpected('ninth');
-            expect(result).to.equal(expected);
-
-        });
-
-        it(`Should export also the admin database`, async function () {
-
-            const options: Options = {
-                databases: ['admin'],
-                systemCollections: true,
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-
-            await mongoExport(options);
-            const result = fs.readdirSync(EXPORTED_PATH);
-            expect(result).to.include('admin');
 
         });
 

@@ -22,107 +22,17 @@ export default function () {
             removeExported(EXPORTED_PATH);
         });
 
-        it(`Should result in TOTAL`, async function () {
+        it(`Should result is TOTAL`, async function () {
 
             const options: Options = {
-                collections: {
-                    animals: ['dogs', 'tigers', 'lions']
-                },
+                collections: /^log/,
                 outDir: EXPORTED_PATH,
                 silent: true
             };
             const result = await mongoExport(options);
 
-            const expected: ExportResult = {
-                code: ExportResultCode.TOTAL,
-                expected: {
-                    animals: ['dogs', 'tigers', 'lions']
-                },
-                actual: {
-                    animals: ['dogs', 'tigers', 'lions']
-                }
-            };
-
-            expect(result).to.deep.equal(expected);
-
-        });
-
-        it(`Should result in PARTIAL`, async function () {
-
-            const options: Options = {
-                collections: {
-                    animals: ['dogs', 'tigers', { collections: 'lions', type: 'csv' }]
-                },
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-            const result = await mongoExport(options);
-
-            const expected: ExportResult = {
-                code: ExportResultCode.PARTIAL,
-                expected: {
-                    animals: ['dogs', 'tigers', 'lions']
-                },
-                actual: {
-                    animals: ['dogs', 'tigers']
-                }
-            };
-
-            expect(result).to.deep.equal(expected);
-
-        });
-
-        it(`Should have a detailed result`, async function () {
-
-            const options: Options = {
-                collections: {
-                    animals: ['dogs', 'tigers', 'lions']
-                },
-                detailedResult: true,
-                outDir: EXPORTED_PATH,
-                silent: true
-            };
-            const result = await mongoExport(options);
-
-            const exportingOptions: ExportingOptions = {
-                fieldFile: undefined,
-                fields: undefined,
-                fileName: undefined,
-                filePath: undefined,
-                jsonArray: false,
-                absolutePath: false,
-                jsonFormat: undefined,
-                limit: undefined,
-                noHeaderLine: false,
-                prependDbName: undefined,
-                pretty: false,
-                query: undefined,
-                quiet: false,
-                skip: undefined,
-                sort: undefined,
-                type: undefined,
-                verbose: false
-            };
-            
-            const expected: ExportResult = {
-                code: ExportResultCode.TOTAL,
-                expected: {
-                    animals: [
-                        { ...exportingOptions, name: 'dogs' },
-                        { ...exportingOptions, name: 'tigers' },
-                        { ...exportingOptions, name: 'lions' }
-                    ]
-                },
-                actual: {
-                    animals: [
-                        { ...exportingOptions, name: 'dogs' },
-                        { ...exportingOptions, name: 'tigers' },
-                        { ...exportingOptions, name: 'lions' }
-                    ]
-                }
-            };
-
-            expect(result).to.deep.equal(expected);
+            const expected = ExportResultCode.TOTAL;
+            expect(result.code).to.equal(expected);
 
         });
 
