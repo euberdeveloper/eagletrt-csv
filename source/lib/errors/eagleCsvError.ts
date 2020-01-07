@@ -7,9 +7,10 @@ export class EagleCsvError extends Error {
      */
     triggerError: Error;
 
-    constructor(message: string, triggerError?: Error) {
+    constructor(message: string, info?: any, triggerError?: Error) {
         super(message);
         this.name = 'EagleCsvError';
+        this.info = info || null;
         this.triggerError = triggerError || null;
     }
 }

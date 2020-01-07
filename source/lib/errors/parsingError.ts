@@ -7,8 +7,8 @@ export class EagleCsvParsingError extends EagleCsvError {
 
     private static readonly DEFAULT_MESSAGE = 'Error while parsing the collections';
 
-    constructor(message?: string, triggerError?: Error) {
-        super(message || EagleCsvParsingError.DEFAULT_MESSAGE, triggerError);
+    constructor(message?: string, info?: any, triggerError?: Error) {
+        super(message || EagleCsvParsingError.DEFAULT_MESSAGE, info, triggerError);
         this.name = 'EagleCsvParsingError';
     }
 

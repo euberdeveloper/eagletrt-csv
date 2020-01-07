@@ -3,7 +3,6 @@ import { MongoScanner, ScanOptions, MongoScannerError, ListDatabasesError, ListC
 import { Options } from '../../interfaces/options';
 import { ConnectionParameters } from '../../interfaces/connection';
 import { ExportSchema, DetailedExportSchema } from '../../interfaces/result';
-import { DatabaseError } from '../../errors';
 
 import { Logger } from '../logger';
 import { purgeExportingOptions } from './purgeExportingOptions';
@@ -12,13 +11,14 @@ import { parseSpecificCollections } from './parseSpecificCollections';
 import { parseGeneralCollections } from './parseGeneralCollections';
 import { parseDatabases } from './parseDatabases';
 import { parseAll } from './parseAll';
+import { EagleCsvParsingError } from '../../errors';
 
 function getWarnMessage(options: Options, logger: Logger) {
     if (options.warnIfLackOfPermissions) {
         return (db: string, error: ListDatabasesError | ListCollectionsError) => {
             let message = error instanceof ListCollectionsError 
-                ? `MongoBack: cannot list collections of ${db}`
-                : 'MongoBack: cannot list databases';
+                ? `EagleCsv: cannot list collections of ${db}`
+                : 'EagleCsv: cannot list databases';
             logger.warn(message, error);
         };
     }
@@ -31,7 +31,8 @@ export async function getParsedCollections(options: Options, dbParams: Connectio
     const result: DetailedExportSchema = {};
     const mongoScannerOptions: ScanOptions = {
         useCache: true, 
-        excludeSystem: !options.systemCollections,
+        excludeDatabases: ['admin', 'config', 'local'],
+        excludeSystem: false,
         ignoreLackOfPermissions: !options.throwIfLackOfPermissions,
         onLackOfPermissions: getWarnMessage(options, logger)
     };
@@ -52,12 +53,7 @@ export async function getParsedCollections(options: Options, dbParams: Connectio
         await mongoScanner.endConnection();
     }
     catch (error) {
-        if (error instanceof MongoScannerError) {
-            throw new DatabaseError(null, error);
-        }
-        else {
-            throw error;
-        }
+        throw new EagleCsvParsingError(null, null, error);
     }
 
     return result;
