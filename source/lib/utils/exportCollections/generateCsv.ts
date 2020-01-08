@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 
-import { EagleGroup, instanceOfEagleGroup, EagleMessages } from "../../interfaces/eagletrt";
+import { EagleGroup, instanceOfEagleGroup, EagleMessages, instanceOfEagleMessages } from "../../interfaces/eagletrt";
 import { ExportingOptions } from '../../interfaces/options';
 import { EagleCsvExportingError } from '../../errors';
 import { createPath } from "./createPath";
@@ -10,37 +10,37 @@ import { createPath } from "./createPath";
 const mkdirAsync = util.promisify(fs.mkdir);
 const writeFileAsync = util.promisify(fs.writeFile);
 
-async function saveCsv(path: string, content: string): Promise<void> {
+async function saveCsv(outPath: string, content: string): Promise<void> {
     try {
-        await writeFileAsync(path, content);
+        await writeFileAsync(outPath, content);
     }
     catch (error) {
         const info = {
-            path,
+            outPath,
             content
         };
         throw new EagleCsvExportingError('Error in writing csv file', info, error);
     }
 }
 
-async function createFolder(path: string): Promise<void> {
+async function createFolder(outPath: string): Promise<void> {
     try {
-        await mkdirAsync(path);
+        await mkdirAsync(outPath);
     }
     catch (error) {
         const info = {
-            path
+            outPath
         };
         throw new EagleCsvExportingError('Error in creating folder', info, error);
     }
 }
 
-async function generateFile(messages: EagleMessages, path: string, options: ExportingOptions): Promise<void> {
+async function generateFile(messages: EagleMessages, outPath: string, options: ExportingOptions): Promise<void> {
     if (messages && messages.length) {
         let keysRow: string, valueRows: string[];
         if (typeof messages[0].value === 'object') {
             keysRow = ['timestamp', ...Object.keys(messages[0].value)].join('\t');
-            valueRows = messages.sort((x, y) => x.timestamp - y.timestamp).map(el => {
+            valueRows = messages.map(el => {
                 let row = '';
                 row += `${el.timestamp}\t`;
                 row += Object.keys(el.value).map(key => `${el.value[key]}`).join('\t');
@@ -49,7 +49,7 @@ async function generateFile(messages: EagleMessages, path: string, options: Expo
         }
         else {
             keysRow = ['timestamp', 'value'].join('\t');
-            valueRows = messages.sort((x, y) => x.timestamp - y.timestamp).map(el => {
+            valueRows = messages.map(el => {
                 let row = '';
                 row += `${el.timestamp}\t`;
                 row += `${el.value}`;
@@ -58,7 +58,7 @@ async function generateFile(messages: EagleMessages, path: string, options: Expo
         }
         const rows = options.noHeaderLine ? valueRows : [keysRow, ...valueRows];
         const content = rows.join('\n');
-        await saveCsv(path, content);
+        await saveCsv(outPath, content);
     }
 }
 
@@ -68,11 +68,12 @@ async function generateFiles(record: EagleGroup, outPath: string, options: Expor
 
         if (instanceOfEagleGroup(messages)) {
             const newPath = path.join(outPath, key);
-            await createFolder(newPath)
+            await createFolder(newPath);
             await generateFiles(messages, newPath, options);
         }
-        else {
-            await generateFile(messages, outPath, options);
+        else if (instanceOfEagleMessages(messages)) {
+            const newPath = path.join(outPath, `${key}.csv`);
+            await generateFile(messages, newPath, options);
         }
     }
 }

@@ -3,26 +3,27 @@ import { EagleRecord, EagleGroup, instanceOfEagleGroup, instanceOfEagleMessages 
 async function mergeGroups(result: EagleGroup, group: EagleGroup): Promise<void> {
     for (const key in group) {
         const resultElement = result[key];
-        const groupElement = result[key];
+        const groupElement = group[key];
 
         if (instanceOfEagleGroup(resultElement) && instanceOfEagleGroup(groupElement)) {
             await mergeGroups(resultElement, groupElement);
         }
         else if (instanceOfEagleMessages(resultElement) && instanceOfEagleMessages(groupElement)) {
             const newElements = groupElement.sort((x, y) => x.timestamp - y.timestamp);
-            result[key] = result[key] ? [...resultElement, ...newElements] : newElements;
+            resultElement.push(...newElements);
         }
     }
 }
 
 export async function parseRecords(records: EagleRecord[]): Promise<EagleGroup> {
     if (records && records.length) {
-        const result = {};
+        const result = records[0];
+        delete result._id;
 
-        for (const record of records) {
-            await mergeGroups(result, record);
+        for (let i = 0; i < records.length; i++) {
+            await mergeGroups(result, records[i]);
         }
-
+        
         return result;
     }
     else {

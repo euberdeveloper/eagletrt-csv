@@ -49,7 +49,7 @@ export class Logger {
         if (this.human) {
             console.log(chalk.white(db));
         }
-        else if (this.human) {
+        else if (this.machine) {
             this.logMachine(`DATABASE ${db}`);
         }
     }
@@ -63,7 +63,7 @@ export class Logger {
             }).start();
             this.spinners[`${db}${collection}`] = spinner;
         }
-        else if (this.human) {
+        else if (this.machine) {
             this.logMachine(`COLLECTION STARTED ${collection}`);
         }
     }
@@ -78,7 +78,7 @@ export class Logger {
                 spinner.fail();
             }
         }
-        else if (this.human) {
+        else if (this.machine) {
             const esito = succeded ? 'SUCCEDED' : 'FAILED';
             this.logMachine(`COLLECTION ${esito} ${collection}`);
         }

@@ -7,7 +7,7 @@ const mkdirAsync = util.promisify(fs.mkdir);
 
 export async function createPath(path: string): Promise<void> {
     try {
-        if (!existsAsync(path)) {
+        if (! (await existsAsync(path))) {
             await mkdirAsync(path, { recursive: true });
         }
     }
