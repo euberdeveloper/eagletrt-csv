@@ -41,7 +41,6 @@ export default function () {
 
             await mongoExport(options);
             const result = getResult(EXPORTED_PATH);
-            fs.writeFileSync(path.join(EXPECTED_PATH, 'first.js'), 'module.exports = `' + result + '`;')
             const expected = getExpected('first');
             expect(result).to.equal(expected);
 
