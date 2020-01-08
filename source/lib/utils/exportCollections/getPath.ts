@@ -16,7 +16,7 @@ export function getPath(db: string, collection: ExportingCollection, options: Op
     }
 
     if (collection.collectionName) {
-        const collectionName = collection.collectionName
+        const collectionName = collection.collectionName;
         result = typeof collectionName === 'string' 
             ? join(result, collectionName)
             : join(result, collectionName(db, collection.name));

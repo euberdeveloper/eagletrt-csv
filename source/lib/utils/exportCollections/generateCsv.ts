@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 
-import { EagleGroup, instanceOfEagleGroup, EagleMessages, instanceOfEagleMessages } from "../../interfaces/eagletrt";
+import { EagleGroup, instanceOfEagleGroup, EagleMessages, instanceOfEagleMessages } from '../../interfaces/eagletrt';
 import { ExportingOptions } from '../../interfaces/options';
 import { EagleCsvExportingError } from '../../errors';
-import { createPath } from "./createPath";
+import { createPath } from './createPath';
 
 const mkdirAsync = util.promisify(fs.mkdir);
 const writeFileAsync = util.promisify(fs.writeFile);

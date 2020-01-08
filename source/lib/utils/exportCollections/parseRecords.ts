@@ -1,4 +1,4 @@
-import { EagleRecord, EagleGroup, instanceOfEagleGroup, instanceOfEagleMessages } from "../../interfaces/eagletrt";
+import { EagleRecord, EagleGroup, instanceOfEagleGroup, instanceOfEagleMessages } from '../../interfaces/eagletrt';
 
 async function mergeGroups(result: EagleGroup, group: EagleGroup): Promise<void> {
     for (const key in group) {

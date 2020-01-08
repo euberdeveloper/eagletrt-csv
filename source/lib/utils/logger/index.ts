@@ -30,7 +30,7 @@ export class Logger {
                 console.log(text);
             }
         }
-    };
+    }
 
     public warnMachine(message: string, object?: any): void {
         if (this.machine) {
@@ -43,7 +43,7 @@ export class Logger {
                 console.warn(text);
             }
         }
-    };
+    }
 
     public exportingDatabase(db: string): void {
         if (this.human) {
