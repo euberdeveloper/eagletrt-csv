@@ -1,6 +1,6 @@
 {
   "name": "eagletrt-csv",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The npm module to export eagleTRT telemetry data as csv",
   "main": "dist/source/index.js",
   "types": "dist/source/index.d.ts",
