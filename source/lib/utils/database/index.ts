@@ -1,6 +1,6 @@
 import { MongoClient, MongoClientOptions, FilterQuery } from 'mongodb';
 import { EagleCsvParsingError, EagleCsvExportingError } from '../../errors';
-import { EagleRecord } from '../../interfaces/eagletrt';
+import { EagleRecord, EagleSession } from '../../interfaces/eagletrt';
 import { ExportingOptions } from '../../interfaces/options';
 
 export class Database {
@@ -16,11 +16,22 @@ export class Database {
         return this.connection !== null;
     }
 
-    private query(options: ExportingOptions): FilterQuery<any> {
+    private queryRecords(session: string, options: ExportingOptions): FilterQuery<any> {
         const id = { id: { $ne: undefined } };
+        const sessionFilter = { sessionName: session };
+        const optionsQuery = typeof options.query === 'string' ? JSON.parse(options.query) : (options.query || null);
         const after = options.after ? { timestamp: { $gte: options.after } } : null;
         const before = options.before ? { timestamp: { $lte: options.before } } : null;
-        const and = [id, after, before].filter(filter => filter !== null);
+        const and = [id, after, before, sessionFilter, optionsQuery].filter(filter => filter !== null);
+        return { $and: and };
+    }
+
+    private querySessions(options: ExportingOptions): FilterQuery<any> {
+        const id = { id: undefined };
+        const optionsQuery = typeof options.query === 'string' ? JSON.parse(options.query) : (options.query || null);
+        const after = options.after ? { timestamp: { $gte: options.after } } : null;
+        const before = options.before ? { timestamp: { $lte: options.before } } : null;
+        const and = [id, after, before, optionsQuery].filter(filter => filter !== null);
         return { $and: and };
     }
 
@@ -33,8 +44,14 @@ export class Database {
         this.connection = await MongoClient.connect(this.uri, this.options);
     }
 
-    public async readCollection(db: string, collection: string, options: ExportingOptions): Promise<EagleRecord[]> {
-        let query = this.connection.db(db).collection(collection).find(this.query(options));
+    public async readSessions(db: string, collection: string, options: ExportingOptions): Promise<EagleSession[]> {
+        let query = this.connection.db(db).collection(collection).find(this.querySessions(options));
+        query = options.limit ? query.limit(options.limit) : query;
+        return query.toArray();
+    }
+
+    public async readRecords(db: string, collection: string, session: string, options: ExportingOptions): Promise<EagleRecord[]> {
+        let query = this.connection.db(db).collection(collection).find(this.queryRecords(session, options));
         query = options.limit ? query.limit(options.limit) : query;
         return query.toArray();
     }
@@ -59,9 +76,9 @@ export class Database {
         }
     }
 
-    public static async readCollection(database: Database, db: string, collection: string, options: ExportingOptions): Promise<EagleRecord[]> {
+    public static async readSessions(database: Database, db: string, collection: string, options: ExportingOptions): Promise<EagleSession[]> {
         try {
-            return database.readCollection(db, collection, options);
+            return database.readSessions(db, collection, options);
         }
         catch (error) {
             const info = {
@@ -71,7 +88,23 @@ export class Database {
                 collection,
                 exportingOptions: options
             };
-            throw new EagleCsvExportingError('Error in reading collection', info, error);
+            throw new EagleCsvExportingError('Error in reading collection sessions', info, error);
+        }
+    }
+
+    public static async readRecords(database: Database, db: string, collection: string, session: string, options: ExportingOptions): Promise<EagleRecord[]> {
+        try {
+            return database.readRecords(db, collection, session, options);
+        }
+        catch (error) {
+            const info = {
+                uri: database.uri,
+                options: database.options,
+                db,
+                collection,
+                exportingOptions: options
+            };
+            throw new EagleCsvExportingError('Error in reading collection records', info, error);
         }
     }
 

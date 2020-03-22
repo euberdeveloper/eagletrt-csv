@@ -24,6 +24,16 @@ export interface ExportingOptions {
      */
     limit?: number;
     /**
+     * Provides a query as a JSON document to return matching
+     * documents in the export.  
+     * 
+     * You can pass the argument either as a string (it will automatically be included
+     * in apixes) or as an object.
+     * 
+     * Default: undefined
+     */
+    query?: string | any;
+    /**
      * Specifies a timestamp and only the records whose timestamp are after or equal to
      * that timestamp will be exported.
      *
@@ -58,4 +68,5 @@ export interface ExportingOptions {
      * Default: undefined
      */
     collectionName?: string | ExportingCollectionName;
+
 }

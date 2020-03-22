@@ -3,7 +3,7 @@ import { join } from 'path';
 import { ExportingCollection } from '../../interfaces/result';
 import { Options } from '../../interfaces/options';
 
-export function getPath(db: string, collection: ExportingCollection, options: Options): string {
+export function getPath(db: string, collection: ExportingCollection, sessionName: string, options: Options): string {
     let result = '';
 
     switch (options.outType) {
@@ -30,5 +30,5 @@ export function getPath(db: string, collection: ExportingCollection, options: Op
         }
     }
 
-    return result;
+    return join(result, sessionName);
 }

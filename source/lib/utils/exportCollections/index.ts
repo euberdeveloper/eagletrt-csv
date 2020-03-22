@@ -7,6 +7,7 @@ import { Logger } from '../logger';
 import { getPath } from './getPath';
 import { parseRecords } from './parseRecords';
 import { generateCsv } from './generateCsv';
+import { EagleSession } from '../../interfaces/eagletrt';
 
 function addExported(exportedCollections: DetailedExportSchema, db: string, collection: ExportingCollection): void {
     if (exportedCollections[db]) {
@@ -17,16 +18,36 @@ function addExported(exportedCollections: DetailedExportSchema, db: string, coll
     }
 }
 
-async function exportCollection(db: string, collection: ExportingCollection, options: Options, exportedCollections: DetailedExportSchema, database: Database, logger: Logger): Promise<boolean> {
+async function exportSession(db: string, collection: ExportingCollection, session: EagleSession, options: Options, database: Database, logger: Logger): Promise<boolean> {
     try {
-        const outPath = getPath(db, collection, options);
-        logger.exportingCollectionStart(db, collection.name);
-        const records = await Database.readCollection(database, db, collection.name, collection);
+        const outPath = getPath(db, collection, session.sessionName, options);
+        const records = await Database.readRecords(database, db, collection.name, session.sessionName, collection);
         const parsedRecords = await parseRecords(records);
         await generateCsv(parsedRecords, outPath, collection);
+    }
+    catch (error) {
+        logger.exportingCollectionStop(db, collection.name, false);
+        if (options.warnIfOneFails) {
+            logger.warn(`EagleCsv: error in exporting session ${session.sessionName} of collection ${collection.name} of db ${db}`, error);
+        }
+        if (options.throwIfOneFails) {
+            throw error;
+        }
+        return false;
+    }
+}
+
+async function exportCollection(db: string, collection: ExportingCollection, options: Options, exportedCollections: DetailedExportSchema, database: Database, logger: Logger): Promise<boolean> {
+    try {
+        logger.exportingCollectionStart(db, collection.name);
+        const sessions = await Database.readSessions(database, db, collection.name, collection);
+        let total = true;
+        for (const session of sessions) {
+            total = await exportSession(db, collection, session, options, database, logger) ? total : false;
+        }
         logger.exportingCollectionStop(db, collection.name, true);
         addExported(exportedCollections, db, collection);
-        return true;
+        return total;
     }
     catch (error) {
         logger.exportingCollectionStop(db, collection.name, false);

@@ -9,7 +9,19 @@ export interface EagleGroup {
     [key: string]: EagleMessages | EagleGroup;
 }
 
-export type EagleRecord = { id: number; timestamp: number; } & EagleGroup;
+export type EagleRecord = { 
+    id: number; 
+    sessionName: string; 
+    timestamp: number; 
+} & EagleGroup;
+
+export type EagleSession = { 
+    sessionName: string;
+    timestamp: number;
+    formatted_timestamp: string;
+    pilot: string;
+    race: string;
+};
 
 export function instanceOfEagleMessages(obj: EagleGroup | EagleMessages): obj is EagleMessages {
     return Array.isArray(obj);

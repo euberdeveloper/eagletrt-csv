@@ -69,7 +69,7 @@ export class Logger {
     }
 
     public exportingCollectionStop(db: string, collection: string, succeded: boolean): void {
-        if (this.human) {
+        if (this.human && this.spinners[`${db}${collection}`]) {
             const spinner = this.spinners[`${db}${collection}`];
             if (succeded) {
                 spinner.succeed();
